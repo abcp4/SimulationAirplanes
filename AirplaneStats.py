@@ -48,6 +48,9 @@ class Stats:
 	def calcstats(self):
 		self.arrival_rate = self.num_arrivals/SIM_TIME
 		self.throughput = self.num_complet/SIM_TIME
+		self.busy_time = SIM_TIME;
+		self.average_time = (self.busy_time/self.num_arrivals)
+		
 		
 	def report(self):
 		print ('\n*** SimPy Simulation Report ***\n')
@@ -56,6 +59,9 @@ class Stats:
 		print ('Total Departures: %d' % self.num_complet)
 		print ('Arrival Rate: %2f' % self.arrival_rate)
 		print ('Throughput: %2f' % self.throughput)
+		print ('Busy Time: %2f' % self.busy_time)
+		print ('Average Service Time %2f' % self.average_time)
+		
 		
 class Carwash(object):
     """A carwash has a limited number of machines (``NUM_MACHINES``) to
