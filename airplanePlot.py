@@ -5,8 +5,8 @@ import simpy
 import plotly
 
 RANDOM_SEED = 42
-NUM_MACHINES = 2  # Numero de pistas no aeroporto
-WASHTIME = 10      
+NUM_TRACKS = 2  # Numero de pistas no aeroporto
+LANDTIME = 10      
 T_INTER = 5       # Chegada de um novo aviao a cada T_INTER minutos
 SIM_TIME = 180     # Tempo da simulacao
 LANDTIME = 5     #tempo de pouso
@@ -75,28 +75,26 @@ class Stats:
 	
 		
 		
-class Carwash(object):
-    """A carwash has a limited number of machines (``NUM_MACHINES``) to
-    clean cars in parallel.
+class Airport(object):
+    """A airport has a limited number of tracks (``NUM_TRACKS``) to
+    be utilized by planes in parallel.
 
-    Cars have to request one of the machines. When they got one, they
-    can start the washing processes and wait for it to finish (which
-    takes ``washtime`` minutes).
+
 
     """
-    def __init__(self, env, num_machines, washtime):
+    def __init__(self, env, NUM_TRACKS, landtime):
         self.env = env
-        self.machine = simpy.Resource(env, num_machines)
-        self.washtime = washtime
+        self.machine = simpy.Resource(env, NUM_TRACKS)
+        self.landtime = landtime
 
-    def pouso(self, car):
-        """The washing processes. It takes a ``car`` processes and tries
+    def pouso(self, plane):
+        """The washing processes. It takes a ``plane`` processes and tries
         to clean it."""
 
 	
         yield self.env.timeout(random.expovariate(1.0 / LANDTIME))
 
-    def partida(self,car):
+    def partida(self,plane):
 		yield self.env.timeout(random.expovariate(1.0/ DEPART_TIME))
 	
 	
@@ -104,8 +102,8 @@ class Carwash(object):
 
 	
 			  
-def car(env, name, cw):
-    """The car process (each car has a ``name``) arrives at the carwash
+def plane(env, name, cw):
+    """The plane process (each plane has a ``name``) arrives at the airport
     (``cw``) and requests a cleaning machine.
 
     It then starts the washing process, waits for it to finish and
@@ -134,26 +132,26 @@ def car(env, name, cw):
         stat.new_completion()
 
 
-def setup(env, num_machines, washtime, t_inter): 
-    """Create a carwash, a number of initial cars and keep creating cars
+def setup(env, NUM_TRACKS, landtime, t_inter): 
+    """Create a airport, a number of initial planes and keep creating planes
     approx. every ``t_inter`` minutes."""
-    # Create the carwash
-    carwash = Carwash(env, num_machines, washtime)
+    # Create the airport
+    airport = Airport(env, NUM_TRACKS, landtime)
 
-    # Create 4 initial cars
+    # Create 4 initial planes
     for i in range(1):
-        env.process(car(env, 'Aviao %d' % i, carwash))
+        env.process(plane(env, 'Aviao %d' % i, airport))
 
-    # Create more cars while the simulation is running
+    # Create more planes while the simulation is running
     while True:
         yield env.timeout(random.randint(t_inter-2, t_inter+2))
 #         yield env.timeout(random.expovariate(1.0 / t_inter))
         i += 1
-        env.process(car(env, 'Aviao %d' % i, carwash))
+        env.process(plane(env, 'Aviao %d' % i, airport))
 
 
 # Setup and start the simulation
-print('===== Carwash =====')
+print('===== Airport =====')
 random.seed(RANDOM_SEED)  # This helps reproducing the results
 
 # Create statistics object
@@ -161,7 +159,7 @@ stat = Stats()
 
 # Create an environment and start the setup process
 env = simpy.Environment()
-env.process(setup(env, NUM_MACHINES, WASHTIME, T_INTER))
+env.process(setup(env, NUM_TRACKS, LANDTIME, T_INTER))
 
 # Execute!
 env.run(until=SIM_TIME)
@@ -175,7 +173,7 @@ stat1 = copy.deepcopy(stat)
 
 
 # Segunda simulação
-print('===== Carwash =====')
+print('===== Airport =====')
 random.seed(RANDOM_SEED)  # This helps reproducing the results
 
 # Create statistics object
@@ -183,7 +181,7 @@ stat = Stats()
 
 # Create an environment and start the setup process
 env = simpy.Environment()
-env.process(setup(env, NUM_MACHINES+1, WASHTIME, T_INTER))
+env.process(setup(env, NUM_TRACKS+1, LANDTIME, T_INTER))
 
 # Execute!
 env.run(until=SIM_TIME)
