@@ -21,6 +21,11 @@ WAIT_TIME = []    #tempo de espera
 SERVICE_TIME = []   # tempo de servico
 SYSTEM_TIME = []    #tempo no sistema
 
+MSS = 1460#bytes
+FRAMEOVHD = 18#bytes
+httpRequest = 290#bytes
+lanBandWidth = 10#mbps
+docSize = 22.23#KB
 # Gera o gráfico 		
 def plot ():
 		plotly.offline.plot({
@@ -36,12 +41,12 @@ def plot ():
 		)
 			
 		})
-def nDatagrams(msgSize,mss):
-    return math.ceil(msgSize / mss)
-def overhead(msgSize,frameOvhd,mss):
-    return nDatagrams(MsgSize, MSS) * (20 + 20 + FrameOvhd)
-def netTime(msgSize,bandWidth,frameOvh,mss):
-    return((msgSize + Overhead(msgSize, frameOvh, mss)) * 8) / (bandWidth * 1000000)
+def nDatagrams(msgSize):
+    return math.ceil(msgSize / MSS)
+def overhead(msgSize):
+    return nDatagrams(MsgSize) * (20 + 20 + FrameOvhd)
+def netTime(msgSize,bandWidth):
+    return((msgSize + Overhead(msgSize)) * 8) / (bandWidth * 1000000)
    
 
 
@@ -92,20 +97,24 @@ class Lan(object):
     def __init__(self, env):
         self.env = env
         self.demanda = 0
-    def findDemand(httpRequest,bandWidth):
-        self.demanda = netTime()
+    def findDemand():
+        self.demanda = netTime(httpRequest,lanBandWidth)+ netTime(docSize*1024,lanBandWidth)
     def delay(self):
         yield self.env.timeout(5)
 class linkSaida(object):
     """ fila independente de carga"""
     def __init__(self, env):
         self.env = env
+    def findDemand():
+        self.demanda = netTime(httpRequest,lanBandWidth)+ netTime(0.0001,lanBandWidth)
     def delay(self):
         yield self.env.timeout(5)
 class linkEntrada(object):
     """ fila independente de carga"""
     def __init__(self, env):
         self.env = env
+    def findDemand():
+        self.demanda = netTime(docSize*1024,lanBandWidth)+ 2*netTime(0.0001,lanBandWidth)
     def delay(self):
         yield self.env.timeout(5)
 
