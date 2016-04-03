@@ -8,7 +8,7 @@ resTime = 0
 Lk(fila com comprimentos)
 for i=1 to k:
 	if(demanda[i]>0):
-		kr++
+		kr+=1
 nr = 15(num de clientes)
 for i=1 to k:
 	if(demanda[i]>0):
@@ -23,4 +23,4 @@ while(error>tolerance and numIter>maxIter): #até convergir
 			residenceTime.append(demanda[i]*(1+NiMinus1R))
 		else:
 			residenceTime.append(demanda[i])
-		resTime += 	residenceTime[i]
+		resTime += residenceTime[i]
