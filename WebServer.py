@@ -1,13 +1,14 @@
 
 # coding: utf-8
 
-# In[5]:
+# In[8]:
 
 from __future__ import division
 import random
 import copy
 import simpy
 import plotly
+import math
 
 RANDOM_SEED = 42
 NUM_TRACKS = 1  # Numero de pistas no aeroporto
@@ -35,6 +36,13 @@ def plot ():
 		)
 			
 		})
+def nDatagrams(msgSize,mss):
+    return math.ceil(msgSize / mss)
+def overhead(msgSize,frameOvhd,mss):
+    return nDatagrams(MsgSize, MSS) * (20 + 20 + FrameOvhd)
+def netTime(msgSize,bandWidth,frameOvh,mss):
+    return((msgSize + Overhead(msgSize, frameOvh, mss)) * 8) / (bandWidth * 1000000)
+   
 
 
 # In[2]:
@@ -83,6 +91,9 @@ class Lan(object):
     """ fila independente de carga"""
     def __init__(self, env):
         self.env = env
+        self.demanda = 0
+    def findDemand(httpRequest,bandWidth):
+        self.demanda = netTime()
     def delay(self):
         yield self.env.timeout(5)
 class linkSaida(object):
